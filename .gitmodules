@@ -1,3 +1,6 @@
 [submodule "apps/commons"]
 	path = apps/commons
 	url = https://github.com/AvaibleUser/raijin-commons.git
+[submodule "apps/identity"]
+	path = apps/identity
+	url = https://github.com/AvaibleUser/raijin-identity.git
