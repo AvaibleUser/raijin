@@ -1,0 +1,3 @@
+[submodule "apps/commons"]
+	path = apps/commons
+	url = https://github.com/AvaibleUser/raijin-commons.git
