@@ -4,6 +4,7 @@ CREATE TABLE
     roles (
         id BIGSERIAL PRIMARY KEY,
         name VARCHAR(50) UNIQUE NOT NULL,
+        color VARCHAR(50),
         description TEXT,
         active BOOLEAN DEFAULT TRUE,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -16,6 +17,7 @@ CREATE TABLE
         id UUID PRIMARY KEY DEFAULT uuid_generate_v4 (),
         first_name VARCHAR(100) NOT NULL,
         last_name VARCHAR(100) NOT NULL,
+        dpi VARCHAR(13) UNIQUE NOT NULL,
         email VARCHAR(255) UNIQUE NOT NULL,
         password VARCHAR(255) NOT NULL,
         role_id BIGINT NOT NULL REFERENCES roles (id) ON DELETE CASCADE,
