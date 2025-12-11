@@ -7,3 +7,6 @@
 [submodule "apps/scrum"]
 	path = apps/scrum
 	url = git@github.com:AvaibleUser/raijin-scrum.git
+[submodule "apps/jiro"]
+	path = apps/jiro
+	url = git@cunoc:ALODEV-GT/jiro.git
