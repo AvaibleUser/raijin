@@ -4,3 +4,6 @@
 [submodule "apps/identity"]
 	path = apps/identity
 	url = https://github.com/AvaibleUser/raijin-identity.git
+[submodule "apps/scrum"]
+	path = apps/scrum
+	url = git@github.com:AvaibleUser/raijin-scrum.git
