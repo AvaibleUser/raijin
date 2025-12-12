@@ -25,3 +25,33 @@ services:
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+
+  raijin-identity:
+    container_name: raijin-identity
+    depends_on: [ "kafka" ]
+    env_file: apps/identity/.env
+    ports: [ "8080:8080" ]
+    build:
+      context: apps/identity
+      dockerfile: Dockerfile
+
+    develop:
+      watch:
+        - path: apps/identity/build/libs/identity-0.0.1-SNAPSHOT.jar
+          action: sync+restart
+          target: /app/identity.jar
+
+  raijin-scrum:
+    container_name: raijin-scrum
+    depends_on: [ "kafka" ]
+    env_file: apps/scrum/.env
+    ports: [ "8081:8080" ]
+    build:
+      context: apps/scrum
+      dockerfile: Dockerfile
+
+    develop:
+      watch:
+        - path: apps/scrum/build/libs/scrum-0.0.1-SNAPSHOT.jar
+          action: sync+restart
+          target: /app/scrum.jar
