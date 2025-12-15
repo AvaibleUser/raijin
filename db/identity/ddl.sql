@@ -13,6 +13,25 @@ CREATE TABLE
     );
 
 CREATE TABLE
+    permissions (
+        id BIGSERIAL PRIMARY KEY,
+        key VARCHAR(100) UNIQUE NOT NULL,
+        description TEXT,
+        active BOOLEAN DEFAULT TRUE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP,
+        deleted_at TIMESTAMP
+    );
+
+CREATE TABLE
+    role_permissions (
+        role_id BIGINT REFERENCES roles (id),
+        permission_id BIGINT REFERENCES permissions (id),
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (role_id, permission_id)
+    );
+
+CREATE TABLE
     users (
         id UUID PRIMARY KEY DEFAULT uuid_generate_v4 (),
         first_name VARCHAR(100) NOT NULL,
@@ -20,7 +39,7 @@ CREATE TABLE
         dpi VARCHAR(13) UNIQUE NOT NULL,
         email VARCHAR(255) UNIQUE NOT NULL,
         password VARCHAR(255) NOT NULL,
-        role_id BIGINT NOT NULL REFERENCES roles (id) ON DELETE CASCADE,
+        role_id BIGINT NOT NULL REFERENCES roles (id),
         verified BOOLEAN DEFAULT FALSE,
         banned BOOLEAN DEFAULT FALSE,
         active BOOLEAN DEFAULT FALSE,

@@ -6,6 +6,12 @@ services:
     ports:
       - 22181:2181
 
+    healthcheck:
+      test: echo ruok | nc 127.0.0.1 2181 || exit -1
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
@@ -13,12 +19,22 @@ services:
   kafka:
     image: confluentinc/cp-kafka:7.7.7
     depends_on:
-      - zookeeper
+      zookeeper:
+        condition: service_healthy
+        restart: true
 
     ports:
       - 29092:29092
 
+    healthcheck:
+      test: /bin/kafka-topics --bootstrap-server localhost:9092 --list | grep -E 'user-commands|project-commands' &> /dev/null
+      start_period: 60s
+      interval: 20s
+      timeout: 5s
+      retries: 5
+
     environment:
+      KAFKA_OPTS: "-Dzookeeper.4lw.commands.whitelist=ruok"
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
