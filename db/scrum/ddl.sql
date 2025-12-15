@@ -2,6 +2,8 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 CREATE SCHEMA IF NOT EXISTS project;
 
+CREATE SCHEMA IF NOT EXISTS sprint;
+
 CREATE TYPE project.project_status AS ENUM('ACTIVE', 'CLOSED');
 
 CREATE TABLE
@@ -38,4 +40,21 @@ CREATE TABLE
         user_id UUID REFERENCES project.users (id),
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         PRIMARY KEY (project_id, user_id)
+    );
+
+CREATE TYPE sprint.sprint_status AS ENUM('PENDING', 'ACTIVE', 'FINISHED');
+
+CREATE TABLE
+    sprint.sprints (
+        id BIGSERIAL PRIMARY KEY,
+        project_id UUID REFERENCES project.projects (id),
+        name VARCHAR(100) NOT NULL,
+        description TEXT,
+        start_date DATE NOT NULL,
+        end_date DATE NOT NULL,
+        status sprint.sprint_status DEFAULT 'PENDING',
+        deleted BOOLEAN DEFAULT FALSE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP,
+        deleted_at TIMESTAMP
     );
