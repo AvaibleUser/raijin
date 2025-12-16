@@ -4,6 +4,49 @@ CREATE SCHEMA IF NOT EXISTS project;
 
 CREATE SCHEMA IF NOT EXISTS sprint;
 
+CREATE SCHEMA IF NOT EXISTS story;
+
+CREATE
+OR REPLACE FUNCTION soft_delete () RETURNS TRIGGER AS $$
+BEGIN
+    IF (TG_OP != 'UPDATE' OR NOT NEW.deleted) THEN
+        RETURN NULL;
+    END IF;
+
+    CASE TG_TABLE_NAME
+        WHEN 'projects' THEN
+            UPDATE sprint.sprints
+            SET
+                deleted = TRUE,
+                deleted_at = CURRENT_TIMESTAMP
+            WHERE
+                project_id = NEW.id;
+        WHEN 'sprints' THEN
+            UPDATE sprint.story_stages
+            SET
+                deleted = TRUE,
+                deleted_at = CURRENT_TIMESTAMP
+            WHERE
+                sprint_id = NEW.id;
+        WHEN 'story_stages' THEN
+            UPDATE story.stories
+            SET
+                deleted = TRUE,
+                deleted_at = CURRENT_TIMESTAMP
+            WHERE
+                stage_id = NEW.id;
+        WHEN 'stories' THEN
+            UPDATE story.acceptance_criteria
+            SET
+                deleted = TRUE,
+                deleted_at = CURRENT_TIMESTAMP
+            WHERE
+                story_id = NEW.id;
+    END CASE;
+    RETURN NULL;
+END;
+$$ LANGUAGE plpgsql;
+
 CREATE TYPE project.project_status AS ENUM('ACTIVE', 'CLOSED');
 
 CREATE TABLE
@@ -21,6 +64,11 @@ CREATE TABLE
         deleted_at TIMESTAMP
     );
 
+CREATE TRIGGER soft_delete_project_trigger
+AFTER
+UPDATE OF deleted ON project.projects FOR EACH ROW
+EXECUTE PROCEDURE soft_delete ();
+
 CREATE TABLE
     project.users (
         id UUID PRIMARY KEY,
@@ -29,6 +77,7 @@ CREATE TABLE
         email VARCHAR(100) NOT NULL,
         role VARCHAR(100) NOT NULL,
         color VARCHAR(100) NOT NULL,
+        deleted BOOLEAN DEFAULT FALSE,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP,
         deleted_at TIMESTAMP
@@ -59,6 +108,11 @@ CREATE TABLE
         deleted_at TIMESTAMP
     );
 
+CREATE TRIGGER soft_delete_sprint_trigger
+AFTER
+UPDATE OF deleted ON sprint.sprints FOR EACH ROW
+EXECUTE PROCEDURE soft_delete ();
+
 CREATE TABLE
     sprint.story_stages (
         id BIGSERIAL PRIMARY KEY,
@@ -67,6 +121,47 @@ CREATE TABLE
         description TEXT,
         order_index INT NOT NULL,
         is_default BOOLEAN DEFAULT FALSE,
+        deleted BOOLEAN DEFAULT FALSE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP,
+        deleted_at TIMESTAMP
+    );
+
+CREATE TRIGGER soft_delete_story_stage_trigger
+AFTER
+UPDATE OF deleted ON sprint.story_stages FOR EACH ROW
+EXECUTE PROCEDURE soft_delete ();
+
+CREATE TYPE story.story_priority AS ENUM('HIGH', 'MEDIUM', 'LOW');
+
+CREATE TABLE
+    story.stories (
+        id BIGSERIAL PRIMARY KEY,
+        stage_id BIGINT REFERENCES sprint.story_stages (id) NULL,
+        product_owner_id UUID REFERENCES project.users (id) NULL,
+        developer_id UUID REFERENCES project.users (id) NULL,
+        name VARCHAR(200) NOT NULL,
+        description TEXT,
+        points INT NOT NULL CHECK (points > 0),
+        priority story.story_priority NOT NULL,
+        deleted BOOLEAN DEFAULT FALSE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP,
+        deleted_at TIMESTAMP
+    );
+
+CREATE TRIGGER soft_delete_story_trigger
+AFTER
+UPDATE OF deleted ON story.stories FOR EACH ROW
+EXECUTE PROCEDURE soft_delete ();
+
+CREATE TABLE
+    story.acceptance_criteria (
+        id BIGSERIAL PRIMARY KEY,
+        story_id BIGINT REFERENCES story.stories (id),
+        description TEXT NOT NULL,
+        reached BOOLEAN DEFAULT FALSE,
+        required BOOLEAN DEFAULT FALSE,
         deleted BOOLEAN DEFAULT FALSE,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP,
