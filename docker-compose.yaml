@@ -3,9 +3,8 @@ name: raijin
 services:
   zookeeper:
     image: confluentinc/cp-zookeeper:7.7.7
-    ports:
-      - 22181:2181
-
+    restart: on-failure
+    ports: [ 22181:2181 ]
     healthcheck:
       test: echo ruok | nc 127.0.0.1 2181 || exit -1
       interval: 10s
@@ -18,13 +17,13 @@ services:
 
   kafka:
     image: confluentinc/cp-kafka:7.7.7
+    restart: on-failure
+    ports: [ 29092:29092 ]
     depends_on:
       zookeeper:
         condition: service_healthy
+        required: true
         restart: true
-
-    ports:
-      - 29092:29092
 
     healthcheck:
       test: /bin/kafka-topics --bootstrap-server localhost:9092 --list | grep -E 'user-commands|project-commands' &> /dev/null
@@ -44,12 +43,17 @@ services:
 
   raijin-identity:
     container_name: raijin-identity
-    depends_on: [ "kafka" ]
     env_file: apps/identity/.env
-    ports: [ "8080:8080" ]
+    ports: [ 8080:8080 ]
     build:
       context: apps/identity
       dockerfile: Dockerfile
+
+    depends_on:
+      kafka:
+        condition: service_healthy
+        required: true
+        restart: true
 
     develop:
       watch:
@@ -59,12 +63,17 @@ services:
 
   raijin-scrum:
     container_name: raijin-scrum
-    depends_on: [ "kafka" ]
     env_file: apps/scrum/.env
-    ports: [ "8081:8080" ]
+    ports: [ 8081:8080 ]
     build:
       context: apps/scrum
       dockerfile: Dockerfile
+
+    depends_on:
+      kafka:
+        condition: service_healthy
+        required: true
+        restart: true
 
     develop:
       watch:

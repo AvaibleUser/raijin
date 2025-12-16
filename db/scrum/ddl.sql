@@ -58,3 +58,17 @@ CREATE TABLE
         updated_at TIMESTAMP,
         deleted_at TIMESTAMP
     );
+
+CREATE TABLE
+    sprint.story_stages (
+        id BIGSERIAL PRIMARY KEY,
+        sprint_id BIGINT REFERENCES sprint.sprints (id),
+        name VARCHAR(100) NOT NULL,
+        description TEXT,
+        order_index INT NOT NULL,
+        is_default BOOLEAN DEFAULT FALSE,
+        deleted BOOLEAN DEFAULT FALSE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP,
+        deleted_at TIMESTAMP
+    );
