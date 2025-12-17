@@ -1,12 +1,12 @@
 [submodule "apps/commons"]
-	path = apps/commons
-	url = https://github.com/AvaibleUser/raijin-commons.git
+  path = apps/commons
+  url = git@github.com:AvaibleUser/raijin-commons.git
 [submodule "apps/identity"]
-	path = apps/identity
-	url = https://github.com/AvaibleUser/raijin-identity.git
+  path = apps/identity
+  url = git@github.com:AvaibleUser/raijin-identity.git
 [submodule "apps/scrum"]
-	path = apps/scrum
-	url = git@github.com:AvaibleUser/raijin-scrum.git
+  path = apps/scrum
+  url = git@github.com:AvaibleUser/raijin-scrum.git
 [submodule "apps/jiro"]
-	path = apps/jiro
-	url = git@cunoc:ALODEV-GT/jiro.git
+  path = apps/jiro
+  url = git@github.com:ALODEV-GT/jiro.git
