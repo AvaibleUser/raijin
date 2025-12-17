@@ -26,9 +26,8 @@ services:
         restart: true
 
     healthcheck:
-      test: /bin/kafka-topics --bootstrap-server localhost:9092 --list | grep -E 'user-commands|project-commands' &> /dev/null
-      start_period: 60s
-      interval: 20s
+      test: [ "CMD", "kafka-broker-api-versions", "--bootstrap-server", "kafka:9092" ]
+      interval: 10s
       timeout: 5s
       retries: 5
 
@@ -41,19 +40,26 @@ services:
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
 
-  raijin-identity:
+  identity-api:
     container_name: raijin-identity
-    env_file: apps/identity/.env
+    env_file: apps/identity/docker.env
+    hostname: identity
     ports: [ 8080:8080 ]
     build:
-      context: apps/identity
-      dockerfile: Dockerfile
+      context: apps
+      dockerfile: identity/Dockerfile
 
     depends_on:
       kafka:
         condition: service_healthy
         required: true
         restart: true
+
+    healthcheck:
+      test: [ "CMD", "curl", "--fail", "http://localhost:8080/api/actuator/health" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
     develop:
       watch:
@@ -61,19 +67,26 @@ services:
           action: sync+restart
           target: /app/identity.jar
 
-  raijin-scrum:
+  scrum-api:
     container_name: raijin-scrum
-    env_file: apps/scrum/.env
+    env_file: apps/scrum/docker.env
+    hostname: scrum
     ports: [ 8081:8080 ]
     build:
-      context: apps/scrum
-      dockerfile: Dockerfile
+      context: apps
+      dockerfile: scrum/Dockerfile
 
     depends_on:
       kafka:
         condition: service_healthy
         required: true
         restart: true
+
+    healthcheck:
+      test: [ "CMD", "curl", "--fail", "http://localhost:8080/api/actuator/health" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
     develop:
       watch:
