@@ -138,6 +138,7 @@ CREATE TABLE
     story.stories (
         id BIGSERIAL PRIMARY KEY,
         stage_id BIGINT REFERENCES sprint.story_stages (id) NULL,
+        project_id UUID REFERENCES project.projects (id),
         product_owner_id UUID REFERENCES project.users (id) NULL,
         developer_id UUID REFERENCES project.users (id) NULL,
         name VARCHAR(200) NOT NULL,
