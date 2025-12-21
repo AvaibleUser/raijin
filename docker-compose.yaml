@@ -10,6 +10,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 3
+      start_period: 30s
 
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
@@ -30,6 +31,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+      start_period: 30s
 
     environment:
       KAFKA_OPTS: "-Dzookeeper.4lw.commands.whitelist=ruok"
@@ -40,11 +42,43 @@ services:
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
 
-  identity-api:
+  gateway:
+    container_name: raijin-gateway
+    env_file: apps/gateway/docker.env
+    ports: [ 8080:8080 ]
+    build:
+      context: apps
+      dockerfile: gateway/Dockerfile
+
+    depends_on:
+      identity:
+        condition: service_healthy
+        required: true
+        restart: true
+
+      scrum:
+        condition: service_healthy
+        required: true
+        restart: true
+
+    healthcheck:
+      test: [ "CMD", "curl", "--fail", "http://localhost:8080/api/actuator/health" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+    develop:
+      watch:
+        - path: apps/gateway/build/libs/gateway-0.0.1-SNAPSHOT.jar
+          action: sync+restart
+          target: /app/gateway.jar
+
+  identity:
     container_name: raijin-identity
     env_file: apps/identity/docker.env
     hostname: identity
-    ports: [ 8080:8080 ]
+    ports: [ 8081:8080 ]
     build:
       context: apps
       dockerfile: identity/Dockerfile
@@ -60,6 +94,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+      start_period: 30s
 
     develop:
       watch:
@@ -67,11 +102,11 @@ services:
           action: sync+restart
           target: /app/identity.jar
 
-  scrum-api:
+  scrum:
     container_name: raijin-scrum
     env_file: apps/scrum/docker.env
     hostname: scrum
-    ports: [ 8081:8080 ]
+    ports: [ 8082:8080 ]
     build:
       context: apps
       dockerfile: scrum/Dockerfile
@@ -87,6 +122,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+      start_period: 30s
 
     develop:
       watch:
@@ -94,7 +130,7 @@ services:
           action: sync+restart
           target: /app/scrum.jar
 
-  notifications-api:
+  notifications:
     container_name: raijin-notifications
     env_file: apps/notifications/docker.env
     build:
@@ -112,6 +148,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+      start_period: 30s
 
     develop:
       watch:

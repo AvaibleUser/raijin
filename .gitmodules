@@ -16,3 +16,6 @@
 [submodule "apps/jiro"]
   path = apps/jiro
   url = git@github.com:ALODEV-GT/jiro.git
+[submodule "apps/gateway"]
+	path = apps/gateway
+	url = git@github.com:AvaibleUser/raijin-gateway.git
