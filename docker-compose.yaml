@@ -93,3 +93,28 @@ services:
         - path: apps/scrum/build/libs/scrum-0.0.1-SNAPSHOT.jar
           action: sync+restart
           target: /app/scrum.jar
+
+  notifications-api:
+    container_name: raijin-notifications
+    env_file: apps/notifications/docker.env
+    build:
+      context: apps
+      dockerfile: notifications/Dockerfile
+
+    depends_on:
+      kafka:
+        condition: service_healthy
+        required: true
+        restart: true
+
+    healthcheck:
+      test: [ "CMD", "curl", "--fail", "http://localhost:8080/api/actuator/health" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+    develop:
+      watch:
+        - path: apps/notifications/build/libs/notifications-0.0.1-SNAPSHOT.jar
+          action: sync+restart
+          target: /app/notifications.jar

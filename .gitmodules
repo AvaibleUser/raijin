@@ -10,6 +10,9 @@
 [submodule "apps/finance"]
 	path = apps/finance
 	url = git@github.com:AvaibleUser/raijin-finance.git
+[submodule "apps/notifications"]
+	path = apps/notifications
+	url = git@github.com:AvaibleUser/raijin-notifications.git
 [submodule "apps/jiro"]
   path = apps/jiro
   url = git@github.com:ALODEV-GT/jiro.git
