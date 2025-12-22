@@ -61,18 +61,16 @@ services:
         required: true
         restart: true
 
+      finance:
+        condition: service_healthy
+        required: true
+        restart: true
+
     healthcheck:
       test: [ "CMD", "curl", "--fail", "http://localhost:8080/api/actuator/health" ]
-      interval: 10s
-      timeout: 5s
+      interval: 30s
+      timeout: 15s
       retries: 5
-      start_period: 30s
-
-    develop:
-      watch:
-        - path: apps/gateway/build/libs/gateway-0.0.1-SNAPSHOT.jar
-          action: sync+restart
-          target: /app/gateway.jar
 
   identity:
     container_name: raijin-identity
@@ -91,16 +89,9 @@ services:
 
     healthcheck:
       test: [ "CMD", "curl", "--fail", "http://localhost:8080/api/actuator/health" ]
-      interval: 10s
-      timeout: 5s
+      interval: 30s
+      timeout: 15s
       retries: 5
-      start_period: 30s
-
-    develop:
-      watch:
-        - path: apps/identity/build/libs/identity-0.0.1-SNAPSHOT.jar
-          action: sync+restart
-          target: /app/identity.jar
 
   scrum:
     container_name: raijin-scrum
@@ -119,16 +110,30 @@ services:
 
     healthcheck:
       test: [ "CMD", "curl", "--fail", "http://localhost:8080/api/actuator/health" ]
-      interval: 10s
-      timeout: 5s
+      interval: 30s
+      timeout: 15s
       retries: 5
-      start_period: 30s
 
-    develop:
-      watch:
-        - path: apps/scrum/build/libs/scrum-0.0.1-SNAPSHOT.jar
-          action: sync+restart
-          target: /app/scrum.jar
+  finance:
+    container_name: raijin-finance
+    env_file: apps/finance/docker.env
+    hostname: finance
+    ports: [ 8083:8080 ]
+    build:
+      context: apps
+      dockerfile: finance/Dockerfile
+
+    depends_on:
+      kafka:
+        condition: service_healthy
+        required: true
+        restart: true
+
+    healthcheck:
+      test: [ "CMD", "curl", "--fail", "http://localhost:8080/api/actuator/health" ]
+      interval: 30s
+      timeout: 15s
+      retries: 5
 
   notifications:
     container_name: raijin-notifications
@@ -145,13 +150,6 @@ services:
 
     healthcheck:
       test: [ "CMD", "curl", "--fail", "http://localhost:8080/api/actuator/health" ]
-      interval: 10s
-      timeout: 5s
+      interval: 30s
+      timeout: 15s
       retries: 5
-      start_period: 30s
-
-    develop:
-      watch:
-        - path: apps/notifications/build/libs/notifications-0.0.1-SNAPSHOT.jar
-          action: sync+restart
-          target: /app/notifications.jar

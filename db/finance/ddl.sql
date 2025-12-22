@@ -6,12 +6,74 @@ CREATE SCHEMA IF NOT EXISTS finance;
 
 CREATE SCHEMA IF NOT EXISTS salary;
 
+CREATE
+OR REPLACE FUNCTION soft_delete () RETURNS TRIGGER AS $$
+BEGIN
+    IF (TG_OP != 'UPDATE' OR NOT NEW.deleted) THEN
+        RETURN NULL;
+    END IF;
+
+    CASE TG_TABLE_NAME
+        WHEN 'employees' THEN
+            UPDATE employee.contracts
+            SET
+                deleted = TRUE,
+                deleted_at = CURRENT_TIMESTAMP
+            WHERE
+                employee_id = NEW.id;
+            UPDATE salary.suspensions
+            SET
+                deleted = TRUE,
+                deleted_at = CURRENT_TIMESTAMP
+            WHERE
+                employee_id = NEW.id;
+            UPDATE salary.bonuses
+            SET
+                deleted = TRUE,
+                deleted_at = CURRENT_TIMESTAMP
+            WHERE
+                employee_id = NEW.id;
+            UPDATE salary.discounts
+            SET
+                deleted = TRUE,
+                deleted_at = CURRENT_TIMESTAMP
+            WHERE
+                employee_id = NEW.id;
+            UPDATE finance.expenses
+            SET
+                deleted = TRUE,
+                deleted_at = CURRENT_TIMESTAMP
+            WHERE
+                employee_id = NEW.id;
+            UPDATE finance.payroll
+            SET
+                deleted = TRUE,
+                deleted_at = CURRENT_TIMESTAMP
+            WHERE
+                employee_id = NEW.id;
+        WHEN 'projects' THEN
+            UPDATE finance.project_income
+            SET
+                deleted = TRUE,
+                deleted_at = CURRENT_TIMESTAMP
+            WHERE
+                project_id = NEW.id;
+            UPDATE finance.expenses
+            SET
+                deleted = TRUE,
+                deleted_at = CURRENT_TIMESTAMP
+            WHERE
+                project_id = NEW.id;
+    END CASE;
+    RETURN NULL;
+END;
+$$ LANGUAGE plpgsql;
+
 CREATE TABLE
     employee.employees (
         id UUID PRIMARY KEY,
         first_name VARCHAR(100) NOT NULL,
         last_name VARCHAR(100) NOT NULL,
-        dpi VARCHAR(20) NOT NULL,
         email VARCHAR(100) NOT NULL,
         hired BOOLEAN DEFAULT FALSE,
         deleted BOOLEAN DEFAULT FALSE,
@@ -19,6 +81,11 @@ CREATE TABLE
         updated_at TIMESTAMP,
         deleted_at TIMESTAMP
     );
+
+CREATE TRIGGER soft_delete_employee_trigger
+AFTER
+UPDATE OF deleted ON employee.employees FOR EACH ROW
+EXECUTE PROCEDURE soft_delete ();
 
 CREATE TABLE
     employee.projects (
@@ -33,8 +100,13 @@ CREATE TABLE
         deleted_at TIMESTAMP
     );
 
+CREATE TRIGGER soft_delete_project_trigger
+AFTER
+UPDATE OF deleted ON employee.projects FOR EACH ROW
+EXECUTE PROCEDURE soft_delete ();
+
 CREATE TABLE
-    employee.employee_assignments (
+    employee.members (
         employee_id UUID REFERENCES employee.employees (id),
         project_id UUID REFERENCES employee.projects (id),
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -100,7 +172,7 @@ CREATE TYPE finance.income_type AS ENUM('FIXED_PRICE', 'HOURLY_RATE');
 CREATE TABLE
     finance.project_income (
         id BIGSERIAL PRIMARY KEY,
-        project_id UUID REFERENCES finance.projects (id),
+        project_id UUID REFERENCES employee.projects (id),
         amount NUMERIC(10, 2) NOT NULL,
         type finance.income_type NOT NULL,
         description TEXT,
@@ -116,8 +188,11 @@ CREATE TYPE finance.expense_type AS ENUM('OPERATIONAL', 'SALARY', 'OTHER');
 CREATE TABLE
     finance.expenses (
         id BIGSERIAL PRIMARY KEY,
-        project_id UUID REFERENCES finance.projects (id) NULL,
-        employee_id UUID REFERENCES employee.employees (id) NULL CHECK (project_id IS NOT NULL OR employee_id IS NULL),
+        project_id UUID REFERENCES employee.projects (id) NULL,
+        employee_id UUID REFERENCES employee.employees (id) NULL CHECK (
+            project_id IS NOT NULL
+            OR employee_id IS NULL
+        ),
         description TEXT NOT NULL,
         amount NUMERIC(10, 2) NOT NULL,
         type finance.expense_type NOT NULL,
