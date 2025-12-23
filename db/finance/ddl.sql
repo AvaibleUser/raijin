@@ -135,6 +135,7 @@ CREATE TABLE
         id BIGSERIAL PRIMARY KEY,
         employee_id UUID REFERENCES employee.employees (id),
         reason TEXT NOT NULL,
+        amount NUMERIC(10, 2) NOT NULL,
         start_date DATE NOT NULL,
         end_date DATE,
         deleted BOOLEAN DEFAULT FALSE,
