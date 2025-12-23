@@ -171,7 +171,7 @@ CREATE TABLE
 CREATE TYPE finance.income_type AS ENUM('FIXED_PRICE', 'HOURLY_RATE');
 
 CREATE TABLE
-    finance.project_income (
+    finance.incomes (
         id BIGSERIAL PRIMARY KEY,
         project_id UUID REFERENCES employee.projects (id),
         amount NUMERIC(10, 2) NOT NULL,
