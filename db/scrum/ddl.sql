@@ -95,7 +95,7 @@ CREATE TYPE sprint.sprint_status AS ENUM('PENDING', 'ACTIVE', 'FINISHED');
 
 CREATE TABLE
     sprint.sprints (
-        id BIGSERIAL PRIMARY KEY,
+        id UUID PRIMARY KEY DEFAULT uuid_generate_v4 (),
         project_id UUID REFERENCES project.projects (id),
         name VARCHAR(100) NOT NULL,
         description TEXT,
@@ -116,7 +116,7 @@ EXECUTE PROCEDURE soft_delete ();
 CREATE TABLE
     sprint.story_stages (
         id BIGSERIAL PRIMARY KEY,
-        sprint_id BIGINT REFERENCES sprint.sprints (id),
+        sprint_id UUID REFERENCES sprint.sprints (id),
         name VARCHAR(100) NOT NULL,
         description TEXT,
         order_index INT NOT NULL,
@@ -136,7 +136,7 @@ CREATE TYPE story.story_priority AS ENUM('HIGH', 'MEDIUM', 'LOW');
 
 CREATE TABLE
     story.stories (
-        id BIGSERIAL PRIMARY KEY,
+        id UUID PRIMARY KEY DEFAULT uuid_generate_v4 (),
         stage_id BIGINT REFERENCES sprint.story_stages (id) NULL,
         project_id UUID REFERENCES project.projects (id),
         product_owner_id UUID REFERENCES project.users (id) NULL,
@@ -159,7 +159,7 @@ EXECUTE PROCEDURE soft_delete ();
 CREATE TABLE
     story.acceptance_criteria (
         id BIGSERIAL PRIMARY KEY,
-        story_id BIGINT REFERENCES story.stories (id),
+        story_id UUID REFERENCES story.stories (id),
         description TEXT NOT NULL,
         reached BOOLEAN DEFAULT FALSE,
         required BOOLEAN DEFAULT FALSE,

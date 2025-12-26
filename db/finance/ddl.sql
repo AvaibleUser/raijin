@@ -117,7 +117,7 @@ CREATE TYPE employee.contract_status AS ENUM('ACTIVE', 'SUSPENDED', 'TERMINATED'
 
 CREATE TABLE
     employee.contracts (
-        id BIGSERIAL PRIMARY KEY,
+        id UUID PRIMARY KEY DEFAULT uuid_generate_v4 (),
         employee_id UUID REFERENCES employee.employees (id),
         base_salary NUMERIC(10, 2) NOT NULL,
         role VARCHAR(100) NOT NULL,
