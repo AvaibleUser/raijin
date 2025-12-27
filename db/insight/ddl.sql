@@ -14,7 +14,7 @@ CREATE TABLE
         full_name VARCHAR(200),
         email VARCHAR(100),
         role VARCHAR(50),
-        active VARCHAR(50),
+        active BOOLEAN,
         hired_at TIMESTAMP,
         terminated_at TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -51,7 +51,8 @@ CREATE TABLE
         name VARCHAR(200),
         stage VARCHAR(100),
         points INT DEFAULT 0,
-        priority dim.story_priority
+        priority dim.story_priority,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
 
 CREATE TABLE
@@ -67,6 +68,7 @@ CREATE TABLE
     bridge.members (
         project_id UUID REFERENCES dim.projects (project_id),
         user_id UUID REFERENCES dim.users (user_id),
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         PRIMARY KEY (project_id, user_id)
     );
 
