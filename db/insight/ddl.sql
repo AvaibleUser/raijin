@@ -59,7 +59,7 @@ CREATE TABLE
 CREATE
 OR REPLACE FUNCTION count_stage_changes () RETURNS TRIGGER AS $$
 BEGIN
-    IF (TG_OP != 'UPDATE' OR NEW.stage == OLD.stage) THEN
+    IF (TG_OP != 'UPDATE' OR NEW.stage = OLD.stage) THEN
         RETURN NULL;
     END IF;
 
