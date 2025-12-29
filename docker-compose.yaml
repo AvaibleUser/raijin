@@ -44,6 +44,7 @@ services:
 
   gateway:
     container_name: raijin-gateway
+    # image: rockspringa/raijin:gateway
     env_file: apps/gateway/docker.env
     ports: [ 8080:8080 ]
     build:
@@ -58,6 +59,7 @@ services:
 
   identity:
     container_name: raijin-identity
+    # image: rockspringa/raijin:identity
     env_file: apps/identity/docker.env
     hostname: identity
     ports: [ 8081:8080 ]
@@ -79,6 +81,7 @@ services:
 
   scrum:
     container_name: raijin-scrum
+    # image: rockspringa/raijin:scrum
     env_file: apps/scrum/docker.env
     hostname: scrum
     ports: [ 8082:8080 ]
@@ -100,6 +103,7 @@ services:
 
   finance:
     container_name: raijin-finance
+    # image: rockspringa/raijin:finance
     env_file: apps/finance/docker.env
     hostname: finance
     ports: [ 8083:8080 ]
@@ -121,6 +125,7 @@ services:
 
   insight:
     container_name: raijin-insight
+    # image: rockspringa/raijin:insight
     env_file: apps/insight/docker.env
     hostname: insight
     ports: [ 8084:8080 ]
@@ -142,6 +147,7 @@ services:
 
   notifications:
     container_name: raijin-notifications
+    # image: rockspringa/raijin:notifications
     env_file: apps/notifications/docker.env
     build:
       context: apps
