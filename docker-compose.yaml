@@ -50,22 +50,6 @@ services:
       context: apps
       dockerfile: gateway/Dockerfile
 
-    depends_on:
-      identity:
-        condition: service_healthy
-        required: true
-        restart: true
-
-      scrum:
-        condition: service_healthy
-        required: true
-        restart: true
-
-      finance:
-        condition: service_healthy
-        required: true
-        restart: true
-
     healthcheck:
       test: [ "CMD", "curl", "--fail", "http://localhost:8080/api/actuator/health" ]
       interval: 30s
@@ -122,6 +106,27 @@ services:
     build:
       context: apps
       dockerfile: finance/Dockerfile
+
+    depends_on:
+      kafka:
+        condition: service_healthy
+        required: true
+        restart: true
+
+    healthcheck:
+      test: [ "CMD", "curl", "--fail", "http://localhost:8080/api/actuator/health" ]
+      interval: 30s
+      timeout: 15s
+      retries: 5
+
+  insight:
+    container_name: raijin-insight
+    env_file: apps/insight/docker.env
+    hostname: insight
+    ports: [ 8084:8080 ]
+    build:
+      context: apps
+      dockerfile: insight/Dockerfile
 
     depends_on:
       kafka:
