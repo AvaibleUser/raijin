@@ -172,7 +172,7 @@ CREATE TABLE
         id BIGSERIAL PRIMARY KEY,
         event_type VARCHAR(100) NOT NULL,
         aggregate_id UUID NOT NULL,
-        actor_id UUID,
+        actor_id UUID REFERENCES dim.users (user_id) NULL,
         occurred_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         details JSONB,
         description TEXT
